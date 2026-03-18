@@ -1,0 +1,513 @@
+$date
+	Tue Mar 17 12:46:50 2026
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ps
+$end
+$scope module mlp_tb_pipelined $end
+$var wire 1 ! valid_out $end
+$var wire 1 " threat $end
+$var wire 32 # conf_delta [31:0] $end
+$var wire 2 $ class_out [1:0] $end
+$var reg 1 % clk $end
+$var reg 1 & rst $end
+$var reg 1 ' valid_in $end
+$var reg 16 ( x0 [15:0] $end
+$var reg 16 ) x1 [15:0] $end
+$var reg 16 * x2 [15:0] $end
+$var reg 16 + x3 [15:0] $end
+$var integer 32 , fail_count [31:0] $end
+$var integer 32 - pass_count [31:0] $end
+$scope function label $end
+$var reg 2 . cls [1:0] $end
+$upscope $end
+$scope module uut $end
+$var wire 1 % clk $end
+$var wire 1 & rst $end
+$var wire 1 ' valid_in $end
+$var wire 16 / x0 [15:0] $end
+$var wire 16 0 x1 [15:0] $end
+$var wire 16 1 x2 [15:0] $end
+$var wire 16 2 x3 [15:0] $end
+$var wire 2 3 winner [1:0] $end
+$var wire 32 4 second_score [31:0] $end
+$var wire 32 5 other_b [31:0] $end
+$var wire 32 6 other_a [31:0] $end
+$var wire 32 7 max_score [31:0] $end
+$var parameter 16 8 B1_0 $end
+$var parameter 16 9 B1_1 $end
+$var parameter 16 : B1_2 $end
+$var parameter 16 ; B1_3 $end
+$var parameter 16 < B1_4 $end
+$var parameter 16 = B1_5 $end
+$var parameter 16 > B1_6 $end
+$var parameter 16 ? B1_7 $end
+$var parameter 16 @ B2_0 $end
+$var parameter 16 A B2_1 $end
+$var parameter 16 B B2_2 $end
+$var parameter 16 C W1_0_0 $end
+$var parameter 16 D W1_0_1 $end
+$var parameter 16 E W1_0_2 $end
+$var parameter 16 F W1_0_3 $end
+$var parameter 16 G W1_0_4 $end
+$var parameter 16 H W1_0_5 $end
+$var parameter 16 I W1_0_6 $end
+$var parameter 16 J W1_0_7 $end
+$var parameter 16 K W1_1_0 $end
+$var parameter 16 L W1_1_1 $end
+$var parameter 16 M W1_1_2 $end
+$var parameter 16 N W1_1_3 $end
+$var parameter 16 O W1_1_4 $end
+$var parameter 16 P W1_1_5 $end
+$var parameter 16 Q W1_1_6 $end
+$var parameter 16 R W1_1_7 $end
+$var parameter 16 S W1_2_0 $end
+$var parameter 16 T W1_2_1 $end
+$var parameter 16 U W1_2_2 $end
+$var parameter 16 V W1_2_3 $end
+$var parameter 16 W W1_2_4 $end
+$var parameter 16 X W1_2_5 $end
+$var parameter 16 Y W1_2_6 $end
+$var parameter 16 Z W1_2_7 $end
+$var parameter 16 [ W1_3_0 $end
+$var parameter 16 \ W1_3_1 $end
+$var parameter 16 ] W1_3_2 $end
+$var parameter 16 ^ W1_3_3 $end
+$var parameter 16 _ W1_3_4 $end
+$var parameter 16 ` W1_3_5 $end
+$var parameter 16 a W1_3_6 $end
+$var parameter 16 b W1_3_7 $end
+$var parameter 16 c W2_0_0 $end
+$var parameter 16 d W2_0_1 $end
+$var parameter 16 e W2_0_2 $end
+$var parameter 16 f W2_1_0 $end
+$var parameter 16 g W2_1_1 $end
+$var parameter 16 h W2_1_2 $end
+$var parameter 16 i W2_2_0 $end
+$var parameter 16 j W2_2_1 $end
+$var parameter 16 k W2_2_2 $end
+$var parameter 16 l W2_3_0 $end
+$var parameter 16 m W2_3_1 $end
+$var parameter 16 n W2_3_2 $end
+$var parameter 16 o W2_4_0 $end
+$var parameter 16 p W2_4_1 $end
+$var parameter 16 q W2_4_2 $end
+$var parameter 16 r W2_5_0 $end
+$var parameter 16 s W2_5_1 $end
+$var parameter 16 t W2_5_2 $end
+$var parameter 16 u W2_6_0 $end
+$var parameter 16 v W2_6_1 $end
+$var parameter 16 w W2_6_2 $end
+$var parameter 16 x W2_7_0 $end
+$var parameter 16 y W2_7_1 $end
+$var parameter 16 z W2_7_2 $end
+$var reg 2 { class_out [1:0] $end
+$var reg 32 | conf_delta [31:0] $end
+$var reg 1 } s1_valid $end
+$var reg 1 ~ s2_valid $end
+$var reg 1 " threat $end
+$var reg 1 ! valid_out $end
+$upscope $end
+$scope task apply_and_check $end
+$var reg 2 !" expected_class [1:0] $end
+$var reg 96 "" expected_label [95:0] $end
+$var reg 16 #" sx0 [15:0] $end
+$var reg 16 $" sx1 [15:0] $end
+$var reg 16 %" sx2 [15:0] $end
+$var reg 16 &" sx3 [15:0] $end
+$var integer 32 '" test_num [31:0] $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+b1111110010001100 z
+b1000001110 y
+b101000 x
+b1101101 w
+b1111110010100111 v
+b1111111110111000 u
+b1111111011000000 t
+b1111111001110010 s
+b110001101 r
+b1111111101000100 q
+b1111111101110010 p
+b111000001 o
+b10001011 n
+b1111111111010100 m
+b1111111111001011 l
+b1000111 k
+b1001100 j
+b1111111101111110 i
+b1111111111110100 h
+b1111111100111010 g
+b101011111 f
+b0 e
+b1111111111111111 d
+b1111111111101001 c
+b1111111100110100 b
+b110000010 a
+b1111111101000110 `
+b1111011 _
+b10000110 ^
+b1111111111011101 ]
+b1111111101111100 \
+b1111111111111100 [
+b11000101 Z
+b1000011 Y
+b1111111110000111 X
+b11011100 W
+b1101001 V
+b10011011 U
+b1111111010100011 T
+b1111111111010101 S
+b1111111100101011 R
+b1111111110110110 Q
+b1111111001010010 P
+b1111101 O
+b1010101 N
+b1111111110001010 M
+b101010000 L
+b1100 K
+b1010011101 J
+b1111111111111101 I
+b1111111011010101 H
+b1111111001000101 G
+b11011 F
+b11100100 E
+b110100 D
+b1111111111111011 C
+b1111111101110011 B
+b1111111110010011 A
+b1111111111101110 @
+b1111111101010000 ?
+b11100000 >
+b1111111110110011 =
+b11001101 <
+b1000100 ;
+b11111100 :
+b100110001 9
+b1111111101010101 8
+$end
+#0
+$dumpvars
+bx '"
+bx &"
+bx %"
+bx $"
+bx #"
+bx ""
+bx !"
+0~
+0}
+b0 |
+b0 {
+b0 7
+b0 6
+b0 5
+b0 4
+b0 3
+b0 2
+b0 1
+b0 0
+b0 /
+bx .
+b0 -
+b0 ,
+b0 +
+b0 *
+b0 )
+b0 (
+0'
+1&
+0%
+b0 $
+b0 #
+0"
+0!
+$end
+#5000
+1%
+#10000
+0%
+#15000
+0&
+1%
+#20000
+0%
+#25000
+1%
+#30000
+0%
+#35000
+1}
+1'
+b1111111010011101 +
+b1111111010011101 2
+b100100001 *
+b100100001 1
+b1111111000100001 )
+b1111111000100001 0
+b1111110101100010 (
+b1111110101100010 /
+b1 '"
+b1000010011000010110001101101011011001110111001001101111011101010110111001100100 ""
+b0 !"
+b1111111010011101 &"
+b100100001 %"
+b1111111000100001 $"
+b1111110101100010 #"
+1%
+#40000
+0%
+#45000
+b11111111111111111111010000100000 4
+b11111111111111111111010000100000 5
+b11111111111111111111001100101010 6
+b1000111100011 7
+1~
+1%
+#46000
+0'
+#50000
+0%
+#55000
+0}
+b1110111000011 #
+b1110111000011 |
+1!
+1%
+#60000
+0%
+#65000
+0~
+1%
+#70000
+0%
+#75000
+0!
+1%
+#76000
+1'
+b1111111010001011 +
+b1111111010001011 2
+b10100001 *
+b10100001 1
+b1111111101100010 )
+b1111111101100010 0
+b10011010 (
+b10011010 /
+b10 '"
+b1000111010101010100111001010011010010000100111101010100001000000010000000100000 ""
+b1 !"
+b1111111010001011 &"
+b10100001 %"
+b1111111101100010 $"
+b10011010 #"
+b1 -
+b0 .
+#80000
+0%
+#85000
+1}
+1%
+#86000
+0'
+#90000
+0%
+#95000
+b1 3
+b11110111 4
+b11111111111111111111010010010111 5
+b11110111 6
+b10011111110 7
+0}
+1~
+1%
+#100000
+0%
+#105000
+1"
+b10000000111 #
+b10000000111 |
+b1 $
+b1 {
+1!
+0~
+1%
+#110000
+0%
+#115000
+0!
+1%
+#116000
+1'
+b101100000 +
+b101100000 2
+b100010 *
+b100010 1
+b1111111111001011 )
+b1111111111001011 0
+b11000101 (
+b11000101 /
+b11 '"
+b1000100010100100100111101001110010001010010000000100000001000000010000000100000 ""
+b10 !"
+b101100000 &"
+b100010 %"
+b1111111111001011 $"
+b11000101 #"
+b10 -
+b1 .
+#120000
+0%
+#125000
+1}
+1%
+#126000
+0'
+#130000
+0%
+#135000
+b10 3
+b11111111111111111111111111101110 7
+b11111111111111111111111010011000 4
+b11111111111111111111011010001011 5
+b11111111111111111111111010011000 6
+0}
+1~
+1%
+#140000
+0%
+#145000
+b101010110 #
+b101010110 |
+b10 $
+b10 {
+1!
+0~
+1%
+#150000
+0%
+#155000
+0!
+1%
+#156000
+1'
+b1111111010011101 +
+b1111111010011101 2
+b100100001 *
+b100100001 1
+b1111111000100001 )
+b1111111000100001 0
+b1111110101100010 (
+b1111110101100010 /
+b11 -
+b10 .
+#160000
+0%
+#165000
+1}
+1%
+#166000
+b1111111010001011 +
+b1111111010001011 2
+b10100001 *
+b10100001 1
+b1111111101100010 )
+b1111111101100010 0
+b10011010 (
+b10011010 /
+#170000
+0%
+#175000
+b1000111100011 7
+b0 3
+b11111111111111111111010000100000 4
+b11111111111111111111010000100000 5
+b11111111111111111111001100101010 6
+1~
+1%
+#176000
+b101100000 +
+b101100000 2
+b100010 *
+b100010 1
+b1111111111001011 )
+b1111111111001011 0
+b11000101 (
+b11000101 /
+#180000
+0%
+#185000
+b1 3
+b11110111 4
+b11111111111111111111010010010111 5
+b11110111 6
+b10011111110 7
+0"
+b1110111000011 #
+b1110111000011 |
+b0 $
+b0 {
+1!
+1%
+#186000
+0'
+#190000
+0%
+#195000
+b10 3
+b11111111111111111111111111101110 7
+b11111111111111111111111010011000 4
+b11111111111111111111011010001011 5
+b11111111111111111111111010011000 6
+0}
+1"
+b10000000111 #
+b10000000111 |
+b1 $
+b1 {
+1%
+#196000
+b1 .
+#200000
+0%
+#205000
+b101010110 #
+b101010110 |
+b10 $
+b10 {
+0~
+1%
+#206000
+b10 .
+#210000
+0%
+#215000
+0!
+1%
+#220000
+0%
+#225000
+1%
+#230000
+0%
+#235000
+1%
+#240000
+0%
+#245000
+1%
+#250000
+0%
+#255000
+1%
+#260000
+0%
+#265000
+1%
+#266000

@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acoustic Threat Classifier — Live Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-card: rgba(17, 24, 39, 0.8);
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --green: #2ecc71;
+            --red: #e74c3c;
+            --yellow: #f39c12;
+            --blue: #3b82f6;
+            --green-glow: rgba(46, 204, 113, 0.3);
+            --red-glow: rgba(231, 76, 60, 0.4);
+            --yellow-glow: rgba(243, 156, 18, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Background gradient animation */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 400;
+        }
+
+        /* Glass Card */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .card-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        /* Grid layout */
+        .grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .grid-2 { grid-template-columns: 1fr 1fr; }
+        .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+        }
+
+        /* Main classification display */
+        .class-display {
+            text-align: center;
+            padding: 40px 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .class-display::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 16px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .class-display.threat::before {
+            background: radial-gradient(ellipse at center, var(--red-glow), transparent 70%);
+            opacity: 1;
+            animation: pulse-bg 1.5s ease-in-out infinite;
+        }
+
+        .class-display.safe::before {
+            background: radial-gradient(ellipse at center, var(--green-glow), transparent 70%);
+            opacity: 1;
+        }
+
+        @keyframes pulse-bg {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .class-icon {
+            font-size: 3.5rem;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .class-label {
+            font-size: 2.8rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+            transition: color 0.3s ease;
+        }
+
+        .class-subtitle {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            position: relative;
+            z-index: 1;
+        }
+
+        .confidence-big {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-top: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Threat badge */
+        .threat-badge {
+            display: inline-block;
+            padding: 6px 20px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 16px;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .threat-badge.safe {
+            background: rgba(46, 204, 113, 0.2);
+            color: var(--green);
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .threat-badge.danger {
+            background: rgba(231, 76, 60, 0.2);
+            color: var(--red);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            animation: pulse-badge 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse-badge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Confidence bars */
+        .bar-container {
+            margin-bottom: 16px;
+        }
+
+        .bar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .bar-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .bar-value {
+            font-size: 0.85rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .bar-track {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .bar-bg { background: var(--green); }
+        .bar-gun { background: var(--red); }
+        .bar-drone { background: var(--yellow); }
+
+        /* Waveform canvas */
+        .waveform-container {
+            position: relative;
+        }
+
+        #waveform {
+            width: 100%;
+            height: 120px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Control button */
+        .controls {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            padding: 14px 40px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, var(--green), #27ae60);
+            color: white;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(46, 204, 113, 0.4);
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, var(--red), #c0392b);
+            color: white;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-stop:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(231, 76, 60, 0.4);
+        }
+
+        /* Status indicator */
+        .status-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .status-dot.active {
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+            animation: blink 1s ease-in-out infinite;
+        }
+
+        .status-dot.inactive {
+            background: var(--text-secondary);
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* History log */
+        .history-list {
+            max-height: 250px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.1) transparent;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 3px solid transparent;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .history-item.bg { border-left-color: var(--green); }
+        .history-item.gun { border-left-color: var(--red); }
+        .history-item.drone { border-left-color: var(--yellow); }
+
+        .history-time {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-variant-numeric: tabular-nums;
+            min-width: 65px;
+        }
+
+        .history-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            flex: 1;
+            margin-left: 10px;
+        }
+
+        .history-conf {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        /* Stat cards */
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 2px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Waiting animation */
+        .waiting {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .waiting::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎯 Acoustic Threat Classifier</h1>
+            <p>Real-time MLP-based audio classification • FPGA-ready inference engine</p>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button id="toggleBtn" class="btn btn-start" onclick="toggleListening()">
+                ▶ Start Listening
+            </button>
+            <div style="margin-top: 10px; font-size: 0.85rem;">
+                <span id="statusDot" class="status-dot inactive"></span>
+                <span id="statusText" style="color: var(--text-secondary);">Not listening</span>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="grid grid-2">
+            <!-- Left: Classification Result -->
+            <div>
+                <!-- Class Display -->
+                <div id="classDisplay" class="card class-display">
+                    <div class="class-icon" id="classIcon">🔇</div>
+                    <div class="class-label" id="classLabel">WAITING</div>
+                    <div class="class-subtitle" id="classSubtitle">Press Start to begin</div>
+                    <div class="confidence-big" id="confBig"></div>
+                    <div id="threatBadge" class="threat-badge safe" style="display: none;">
+                        NO THREAT
+                    </div>
+                </div>
+
+                <!-- Waveform -->
+                <div class="card waveform-container">
+                    <div class="card-title">Audio Waveform</div>
+                    <canvas id="waveform"></canvas>
+                </div>
+            </div>
+
+            <!-- Right: Confidence + History -->
+            <div>
+                <!-- Confidence Bars -->
+                <div class="card">
+                    <div class="card-title">Class Probabilities</div>
+                    
+                    <div class="bar-container">
+                        <div class="bar-header">
+                            <span class="bar-label" style="color: var(--green);">🟢 Background</span>
+                            <span class="bar-value" id="barValBg">0%</span>
+                        </div>
+                        <div class="bar-track">
+                            <div class="bar-fill bar-bg" id="barFillBg" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="bar-container">
+                        <div class="bar-header">
+                            <span class="bar-label" style="color: var(--red);">🔴 Gunshot</span>
+                            <span class="bar-value" id="barValGun">0%</span>
+                        </div>
+                        <div class="bar-track">
+                            <div class="bar-fill bar-gun" id="barFillGun" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="bar-container">
+                        <div class="bar-header">
+                            <span class="bar-label" style="color: var(--yellow);">🟡 Drone</span>
+                            <span class="bar-value" id="barValDrone">0%</span>
+                        </div>
+                        <div class="bar-track">
+                            <div class="bar-fill bar-drone" id="barFillDrone" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-3" style="margin-bottom: 20px;">
+                    <div class="card" style="text-align: center; padding: 16px;">
+                        <div class="stat-value" id="statTotal" style="color: var(--blue);">0</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="card" style="text-align: center; padding: 16px;">
+                        <div class="stat-value" id="statThreats" style="color: var(--red);">0</div>
+                        <div class="stat-label">Threats</div>
+                    </div>
+                    <div class="card" style="text-align: center; padding: 16px;">
+                        <div class="stat-value" id="statSafe" style="color: var(--green);">0</div>
+                        <div class="stat-label">Safe</div>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div class="card">
+                    <div class="card-title">Detection History</div>
+                    <div class="history-list" id="historyList">
+                        <div class="waiting" id="waitingMsg">Waiting for classifications</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── Socket.IO Connection ────────────────────────────────────────────
+        const socket = io();
+        let isListening = false;
+        let totalCount = 0;
+        let threatCount = 0;
+        let safeCount = 0;
+
+        // ── Toggle Listening ────────────────────────────────────────────────
+        function toggleListening() {
+            if (isListening) {
+                socket.emit('stop_listening');
+            } else {
+                socket.emit('start_listening');
+            }
+        }
+
+        // ── Status Updates ──────────────────────────────────────────────────
+        socket.on('status', (data) => {
+            isListening = data.listening;
+            const btn = document.getElementById('toggleBtn');
+            const dot = document.getElementById('statusDot');
+            const txt = document.getElementById('statusText');
+
+            if (isListening) {
+                btn.className = 'btn btn-stop';
+                btn.textContent = '⏹ Stop Listening';
+                dot.className = 'status-dot active';
+                txt.textContent = 'Listening on microphone...';
+            } else {
+                btn.className = 'btn btn-start';
+                btn.textContent = '▶ Start Listening';
+                dot.className = 'status-dot inactive';
+                txt.textContent = 'Not listening';
+            }
+        });
+
+        // ── Classification Results ──────────────────────────────────────────
+        socket.on('classification', (data) => {
+            // Update main display
+            const display = document.getElementById('classDisplay');
+            const icon = document.getElementById('classIcon');
+            const label = document.getElementById('classLabel');
+            const subtitle = document.getElementById('classSubtitle');
+            const confBig = document.getElementById('confBig');
+            const badge = document.getElementById('threatBadge');
+
+            const icons = { 0: '🌿', 1: '💥', 2: '🛸' };
+            const subtitles = { 
+                0: 'Environment audio — no threat detected',
+                1: 'GUNFIRE DETECTED — immediate alert!',
+                2: 'DRONE DETECTED — aerial threat!'
+            };
+
+            icon.textContent = icons[data.class];
+            label.textContent = data.label;
+            label.style.color = data.color;
+            subtitle.textContent = subtitles[data.class];
+            confBig.textContent = data.confidence + '% confidence';
+            confBig.style.color = data.color;
+
+            // Threat badge
+            badge.style.display = 'inline-block';
+            if (data.threat) {
+                display.className = 'card class-display threat';
+                badge.className = 'threat-badge danger';
+                badge.textContent = '⚠ THREAT DETECTED';
+            } else {
+                display.className = 'card class-display safe';
+                badge.className = 'threat-badge safe';
+                badge.textContent = '✓ NO THREAT';
+            }
+
+            // Update confidence bars
+            const probs = data.probabilities;
+            document.getElementById('barFillBg').style.width = probs.background + '%';
+            document.getElementById('barValBg').textContent = probs.background + '%';
+            document.getElementById('barFillGun').style.width = probs.gunshot + '%';
+            document.getElementById('barValGun').textContent = probs.gunshot + '%';
+            document.getElementById('barFillDrone').style.width = probs.drone + '%';
+            document.getElementById('barValDrone').textContent = probs.drone + '%';
+
+            // Update stats
+            totalCount++;
+            if (data.threat) threatCount++;
+            else safeCount++;
+            document.getElementById('statTotal').textContent = totalCount;
+            document.getElementById('statThreats').textContent = threatCount;
+            document.getElementById('statSafe').textContent = safeCount;
+
+            // Add to history
+            const historyList = document.getElementById('historyList');
+            const waitingMsg = document.getElementById('waitingMsg');
+            if (waitingMsg) waitingMsg.remove();
+
+            const item = document.createElement('div');
+            const cssClass = data.class === 0 ? 'bg' : data.class === 1 ? 'gun' : 'drone';
+            item.className = 'history-item ' + cssClass;
+            item.innerHTML = `
+                <span class="history-time">${data.timestamp}</span>
+                <span class="history-label" style="color: ${data.color};">${data.label}</span>
+                <span class="history-conf">${data.confidence}%</span>
+            `;
+            historyList.insertBefore(item, historyList.firstChild);
+
+            // Keep only last 20 items
+            while (historyList.children.length > 20) {
+                historyList.removeChild(historyList.lastChild);
+            }
+        });
+
+        // ── Waveform Visualization ──────────────────────────────────────────
+        const canvas = document.getElementById('waveform');
+        const ctx = canvas.getContext('2d');
+
+        function drawWaveform(data) {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const width = rect.width;
+            const height = rect.height;
+            const mid = height / 2;
+            const len = data.length;
+
+            // Clear
+            ctx.clearRect(0, 0, width, height);
+
+            // Gradient fill
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
+            gradient.addColorStop(0.5, 'rgba(59, 130, 246, 0.05)');
+            gradient.addColorStop(1, 'rgba(59, 130, 246, 0.3)');
+
+            // Draw center line
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, mid);
+            ctx.lineTo(width, mid);
+            ctx.stroke();
+
+            // Draw waveform fill
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.moveTo(0, mid);
+            for (let i = 0; i < len; i++) {
+                const x = (i / len) * width;
+                const y = mid + data[i] * mid * 0.9;
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(width, mid);
+            ctx.closePath();
+            ctx.fill();
+
+            // Draw waveform line
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            for (let i = 0; i < len; i++) {
+                const x = (i / len) * width;
+                const y = mid + data[i] * mid * 0.9;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        }
+
+        socket.on('waveform', (data) => {
+            drawWaveform(data.data);
+        });
+
+        // ── Error Handling ──────────────────────────────────────────────────
+        socket.on('error', (data) => {
+            console.error('Server error:', data.message);
+        });
+
+        socket.on('disconnect', () => {
+            const dot = document.getElementById('statusDot');
+            const txt = document.getElementById('statusText');
+            dot.className = 'status-dot inactive';
+            txt.textContent = 'Disconnected — reconnecting...';
+        });
+
+        // Handle canvas resize
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('waveform');
+            canvas.width = canvas.parentElement.clientWidth;
+        });
+    </script>
+</body>
+</html>
